@@ -56,12 +56,32 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        colorView.layer.cornerRadius = 10
+        redrawView()
+        
+        // Add Done button on numberPad
+        let toolbar = UIToolbar()
+        let flexSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        let doneButton = UIBarButtonItem(title: "Done", style: .done, target: self, action: #selector(doneButtonTapped))
+        
+        toolbar.setItems([flexSpace, doneButton], animated: true)
+        toolbar.sizeToFit()
+        
         redTextField.delegate = self
         greenTextField.delegate = self
         blueTextField.delegate = self
         
-        colorView.layer.cornerRadius = 10
-        redrawView()
+        redTextField.inputAccessoryView = toolbar
+        greenTextField.inputAccessoryView = toolbar
+        blueTextField.inputAccessoryView = toolbar
+        
+        // Dissmiss keyboard on tap view
+        let tap = UITapGestureRecognizer(target: view, action: #selector(UIView.endEditing))
+        view.addGestureRecognizer(tap)
+    }
+    
+    @objc func doneButtonTapped() {
+        view.endEditing(true)
     }
 
     @IBAction func onChangeRed(_ sender: Any) {
@@ -92,10 +112,13 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
         
         switch textField {
         case redTextField:
+            print("red")
             red = castValue
         case greenTextField:
+            print("green")
             green = castValue
         case blueTextField:
+            print("blue")
             blue = castValue
         default:
             break
