@@ -41,6 +41,8 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
     
     @IBOutlet var colorView: UIView!
     
+    private var beforeTextFields = [Int: String?]()
+    
     var (red, green, blue, alpha) = (CGFloat(1), CGFloat(1), CGFloat(1), CGFloat(1))
     var color: UIColor {
         get {
@@ -84,17 +86,9 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
         view.endEditing(true)
     }
 
-    @IBAction func onChangeRed(_ sender: Any) {
+    @IBAction func onChangeSlider() {
         red = CGFloat(redSlider.value/255)
-        redrawView()
-    }
-    
-    @IBAction func onChangeGreen(_ sender: Any) {
         green = CGFloat(greenSlider.value/255)
-        redrawView()
-    }
-    
-    @IBAction func onChangeBlue(_ sender: Any) {
         blue = CGFloat(blueSlider.value/255)
         redrawView()
     }
@@ -103,7 +97,21 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
         self.delegate?.update(color: color)
     }
     
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        beforeTextFields[textField.hashValue] = textField.text
+        return true
+    }
+    
     func textFieldDidEndEditing(_ textField: UITextField) {
+        // Return old value textFild for empty value
+        if let before = beforeTextFields[textField.hashValue] {
+            if textField.text?.isEmpty ?? true {
+                textField.text = before
+                return
+            }
+        }
+        
+        // Cast value
         var inputValue = Float(textField.text ?? "255") ?? 255
         inputValue = inputValue < 0 ? 0.0 : inputValue
         inputValue = inputValue > 255 ? 255.0 : inputValue
@@ -147,4 +155,3 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
         blueTextField.text = blueLabel.text
     }
 }
-
