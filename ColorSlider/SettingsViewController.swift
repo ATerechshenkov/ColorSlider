@@ -104,8 +104,8 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         // Return old value textFild for empty value
-        if let before = beforeTextFields[textField.hashValue] {
-            if textField.text?.isEmpty ?? true {
+        if textField.text?.isEmpty ?? true {
+            if let before = beforeTextFields[textField.hashValue] {
                 textField.text = before
                 return
             }
