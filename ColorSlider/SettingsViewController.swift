@@ -23,6 +23,12 @@ protocol ColorViewControllerDelegate: AnyObject {
     func update(color: UIColor)
 }
 
+enum RGB {
+    case red
+    case green
+    case blue
+}
+
 class SettingsViewController: UIViewController, UITextFieldDelegate {
     
     weak var delegate: ColorViewControllerDelegate?
@@ -30,10 +36,6 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet var redSlider: UISlider!
     @IBOutlet var greenSlider: UISlider!
     @IBOutlet var blueSlider: UISlider!
-    
-    @IBOutlet var redLabel: UILabel!
-    @IBOutlet var greenLabel: UILabel!
-    @IBOutlet var blueLabel: UILabel!
     
     @IBOutlet var redTextField: UITextField!
     @IBOutlet var greenTextField: UITextField!
@@ -58,6 +60,7 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // View Appearance
         colorView.layer.cornerRadius = 10
         redrawView()
         
@@ -142,16 +145,52 @@ class SettingsViewController: UIViewController, UITextFieldDelegate {
         greenSlider.value = Float(green * 255)
         blueSlider.value = Float(blue * 255)
         
-        redSlider.minimumTrackTintColor = UIColor(red: red, green: 0, blue: 0, alpha: 1)
-        greenSlider.minimumTrackTintColor = UIColor(red: 0, green: green, blue: 0, alpha: 1)
-        blueSlider.minimumTrackTintColor = UIColor(red: 0, green: 0, blue: blue, alpha: 1)
+        redrawRGBSlider(slider: redSlider, color: RGB.red)
+        redrawRGBSlider(slider: greenSlider, color: RGB.green)
+        redrawRGBSlider(slider: blueSlider, color: RGB.blue)
 
-        redLabel.text = String(format: "%.0f", redSlider.value)
-        greenLabel.text = String(format: "%.0f", greenSlider.value)
-        blueLabel.text = String(format: "%.0f", blueSlider.value)
+        redTextField.text = String(format: "%.0f", redSlider.value)
+        greenTextField.text = String(format: "%.0f", greenSlider.value)
+        blueTextField.text = String(format: "%.0f", blueSlider.value)
+    }
+    
+    func redrawRGBSlider(slider:UISlider, color rgb: RGB) {
+        let tgl = CAGradientLayer()
+        let frame = CGRect.init(x:0, y:0, width:slider.frame.size.width, height:15)
+        tgl.frame = frame
         
-        redTextField.text = redLabel.text
-        greenTextField.text = greenLabel.text
-        blueTextField.text = blueLabel.text
+        var reds = [red, red, red]
+        var greens = [green, green, green]
+        var blues = [blue, blue, blue]
+        let gradients = [CGFloat(0), CGFloat(0.5), CGFloat(1)]
+        
+        switch rgb {
+        case .red:
+            reds = gradients
+        case .green:
+            greens = gradients
+        case .blue:
+            blues = gradients
+        }
+           
+        tgl.colors = [
+            UIColor(red: reds[0], green: greens[0], blue: blues[0], alpha: 1).cgColor,
+            UIColor(red: reds[1], green: greens[1], blue: blues[1], alpha: 1).cgColor,
+            UIColor(red: reds[2], green: greens[2], blue: blues[2], alpha: 1).cgColor
+        ]
+        tgl.startPoint = CGPoint.init(x:0.0, y:0.5)
+        tgl.endPoint = CGPoint.init(x:1.0, y:0.5)
+
+        UIGraphicsBeginImageContextWithOptions(tgl.frame.size, tgl.isOpaque, 0.0);
+        tgl.render(in: UIGraphicsGetCurrentContext()!)
+        
+        if let image = UIGraphicsGetImageFromCurrentImageContext() {
+            UIGraphicsEndImageContext()
+
+            image.resizableImage(withCapInsets: UIEdgeInsets.zero)
+
+            slider.setMinimumTrackImage(image, for: .normal)
+            slider.setMaximumTrackImage(image, for: .normal)
+        }
     }
 }
